@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  pg:
+    image: postgres:latest
+    container_name: postgres_1lab_docker
+    restart: always
+    environment:
+      POSTGRES_DB: db_person
+      POSTGRES_USER: earth04
+      POSTGRES_PASSWORD: s3IsL49E
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - 1main-net
+    ports:
+      - "5509:5432"
+
+  python:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: python_1lab_docker
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://earth04:s3IsL49E@pg:5432/db_person
+    depends_on:
+      - pg
+    networks:
+      - 1main-net
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx_1lab_docker
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - python
+    networks:
+      - 1main-net
+
+volumes:
+  postgres_data:
+
+networks:
+  1main-net:
+    driver: bridge
